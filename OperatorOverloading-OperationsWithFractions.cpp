@@ -1,31 +1,34 @@
-﻿#include <iostream>
+#include <iostream>
 #include <exception>
-#include <string>
+#include <numeric>
 #include <Windows.h>
+
+#define cPRINTs std::cout <<
+#define cPRINTe << '\n'
+#define cINPUT std::cin >>
 
 class Fraction
 {
-	private:
 		int numerator_;
 		int denominator_;
 	public:
 
-		Fraction operator + (Fraction& num)
+		Fraction operator + (Fraction& num) const
 		{
 			return Fraction(numerator_ * num.denominator_ + num.numerator_ * denominator_, denominator_ * num.denominator_);
 		}
 
-		Fraction operator - (Fraction& num)
+		Fraction operator - (Fraction& num) const
 		{
 			return Fraction(numerator_ * num.denominator_ - num.numerator_ * denominator_, denominator_ * num.denominator_);
 		}
 
-		Fraction operator * (Fraction& num)
+		Fraction operator * (Fraction& num) const
 		{
 			return Fraction(numerator_ * num.numerator_, denominator_ * num.denominator_);
 		}
 
-		Fraction operator / (Fraction& num)
+		Fraction operator / (Fraction& num) const
 		{
 			return Fraction(numerator_ * num.denominator_, denominator_ * num.numerator_);
 		}
@@ -33,14 +36,13 @@ class Fraction
 		Fraction& operator -()
 		{
 			numerator_ = -numerator_;
-			denominator_ = -denominator_;
+//			denominator_ = -denominator_;
 			return (*this);
-//			return Fraction(-numerator_, denominator_);
 		}
 
-		Fraction& operator++()
+		Fraction operator++()
 		{
-			numerator_ += 1;
+			numerator_ += denominator_;
 //			denominator_ += 1;
 			return (*this);
 		}
@@ -52,9 +54,9 @@ class Fraction
 			return tmp;
 		}
 
-		Fraction& operator--()
+		Fraction operator--()
 		{
-			numerator_ -= 1;
+			numerator_ -= denominator_;
 //			denominator_ -= 1;
 			return (*this);
 		}
@@ -66,26 +68,21 @@ class Fraction
 			return tmp;
 		}
 
-		std::string output_result()
+		friend std::ostream& operator<<(std::ostream& stream, const Fraction& num)
 		{
-//			int tmp1, tmp2;
-//			tmp1 = numerator_;
-//			tmp2 = denominator_;
-			for(int i = 9; i > 1; i--)
-			{
-				while (numerator_ % i == 0 && denominator_ % i == 0)
-				{
-					numerator_ /= i;
-					denominator_ /= i;
-				}
-			}
-			return std::to_string(numerator_) + "/" + std::to_string(denominator_);
+			stream << num.numerator_ << '/' << num.denominator_;
+			return stream;
 		}
 
 		Fraction(int numerator, int denominator)
 		{
-			numerator_ = numerator;
-			denominator_ = denominator;
+			if (denominator == 0)
+				throw std::exception("Ошибка! Попытка деления на 0");
+
+			int gcd = std::gcd(std::abs(numerator), std::abs(denominator));
+
+			numerator_ = (numerator / gcd);
+			denominator_ = (denominator / gcd);
 		}
 };
 
@@ -94,29 +91,44 @@ int main() // Задача 2. Остальные операции с дробя�
 	SetConsoleCP(CP_UTF8);
 	SetConsoleOutputCP(CP_UTF8);
 
-	int a = 1, b = 1, x = 1, z = 1;
-	std::cout << "Введите числитель дроби 1: ";
-	std::cin >> a;
-	std::cout << "Введите знаменатель дроби 1: ";
-	std::cin >> b;
-	std::cout << "Введите числитель дроби 2: ";
-	std::cin >> x;
-	std::cout << "Введите знаменатель дроби 2: ";
-	std::cin >> z;
+	int a = 3, b = 4, x = 4, z = 5;
+	cPRINTs "Введите числитель дроби 1: ";
+	cINPUT a;
+	cPRINTs "Введите знаменатель дроби 1: ";
+	cINPUT b;
+	cPRINTs "Введите числитель дроби 2: ";
+	cINPUT x;
+	cPRINTs "Введите знаменатель дроби 2: ";
+	cINPUT z;
 
-	Fraction f1(a, b);
-	Fraction f2(x, z);
+	try
+	{
+		Fraction f1(a, b);
+		Fraction f2(x, z);
 
-	std::cout << a << "/" << b << " + " << x << "/" << z << " = " << (f1 + f2).output_result() << '\n';
-	std::cout << a << "/" << b << " - " << x << "/" << z << " = " << (f1 - f2).output_result() << '\n';
-	std::cout << a << "/" << b << " * " << x << "/" << z << " = " << (f1 * f2).output_result() << '\n';
-	std::cout << a << "/" << b << " / " << x << "/" << z << " = " << (f1 / f2).output_result() << '\n';
-//	std::cout << -a << "/" << b << " = " << (-f1).output_result() << '\n';
-//	Fraction f12 = f1 * f2;
-	std::cout << "++" << a << "/" << b << " * " << x << "/" << z << " = " << ((++f1) * f2).output_result() << '\n';
-	std::cout << a << "/" << b << "--" << " * " << x << "/" << z << " = " << ((f1--) * f2).output_result() << '\n';
-	std::cout << a << "/" << b << "++" << " * " << x << "/" << z << " = " << ((f1++) * f2).output_result() << '\n';
-	std::cout << "--" << a << "/" << b << " * " << x << "/" << z << " = " << ((--f1)*f2).output_result() << '\n';
-	std::cout << "-" << a << "/" << b << " * " << x << "/" << z << " = " << (-f1 * f2).output_result() << '\n';
+		cPRINTs f1 << " + " << f2 << " = " << (f1 + f2) cPRINTe;
+		cPRINTs f1 << " - " << f2 << " = " << (f1 - f2) cPRINTe;
+		cPRINTs f1 << " * " << f2 << " = " << (f1 * f2) cPRINTe;
+		cPRINTs f1 << " / " << f2 << " = " << (f1 / f2) cPRINTe;
+
+		cPRINTs "++" << f1 << " * " << f2 << " = " << (++f1 * f2) cPRINTe;
+		cPRINTs "Значение переменной 1: " << f1 cPRINTe;
+
+		cPRINTs f1 << "--" << " * " << f2 << " = " << (f1-- * f2) cPRINTe;
+		cPRINTs "Значение переменной 1: " << f1 cPRINTe;
+
+		cPRINTs f1 << "++" << " * " << f2 << " = " << (f1++ * f2) cPRINTe;
+		cPRINTs "Значение переменной 1: " << f1 cPRINTe;
+
+		cPRINTs "--" << f1 << " * " << f2 << " = " << (--f1 * f2) cPRINTe;
+		cPRINTs "Значение переменной 1: " << f1 cPRINTe;
+
+		cPRINTs "-" << f1 << " * " << f2 << " = " << (-f1 * f2) cPRINTe;
+	}
+	catch (const std::exception& zero_div)
+	{
+		cPRINTs zero_div.what() cPRINTe;
+	}
+
 	return 0;
 }
